@@ -1,4 +1,5 @@
 // JavaScript for board member functionality
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize event form preview
     initEventFormPreview();
@@ -11,24 +12,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize club selection for modification
     initClubSelection();
-    
-    // Add confirmation for delete actions
-    setupDeleteConfirmations();
 });
+
 /**
  * Initialize preview functionality for event form
  */
-function setupDeleteConfirmations() {
-    const deleteForms = document.querySelectorAll('form[onsubmit*="confirm"]');
-    deleteForms.forEach(form => {
-        form.addEventListener('submit', function(e) {
-            if (!confirm(this.getAttribute('onsubmit').match(/return confirm\('([^']+)'/)[1])) {
-                e.preventDefault();
-            }
-        });
-    });
-}
-
 function initEventFormPreview() {
     const previewButton = document.getElementById('preview-event-btn');
     const previewContainer = document.getElementById('event-preview');

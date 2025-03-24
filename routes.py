@@ -46,6 +46,7 @@ def index():
             return redirect(url_for('dsw_dashboard'))
     return redirect(url_for('login'))
 
+# ch3
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -59,12 +60,14 @@ def login():
         
         if user and user.check_password(password):
             login_user(user)
-            return redirect(url_for('index'))
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('index'))
         else:
             flash('Invalid username or password', 'danger')
     
     return render_template('login.html')
 
+# ch2
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -90,15 +93,20 @@ def register():
             flash('Email already exists', 'danger')
             return render_template('register.html')
         
-        # Create user
-        user = User(username=username, email=email, role=role)
-        user.set_password(password)
-        
-        db.session.add(user)
-        db.session.commit()
-        
-        flash('Registration successful. Please log in.', 'success')
-        return redirect(url_for('login'))
+        try:
+            # Create user
+            user = User(username=username, email=email, role=role)
+            user.set_password(password)
+            
+            db.session.add(user)
+            db.session.commit()
+            
+            flash('Registration successful. Please log in.', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            db.session.rollback()
+            flash('An error occurred during registration', 'danger')
+            return render_template('register.html')
     
     return render_template('register.html')
 
@@ -180,6 +188,7 @@ def student_chapters():
     chapters = Club.query.filter_by(type='chapter').all()
     return render_template('student/chapters.html', chapters=chapters)
 
+# ch4
 @app.route('/student/register/<int:event_id>', methods=['POST'])
 @login_required
 def register_for_event(event_id):
@@ -197,13 +206,17 @@ def register_for_event(event_id):
     if registration:
         return jsonify({'success': False, 'message': 'Already registered for this event.'}), 400
     
-    # Register for event
-    registration = Registration(user_id=current_user.id, event_id=event_id)
-    db.session.add(registration)
-    db.session.commit()
+    try:
+        # Register for event
+        registration = Registration(user_id=current_user.id, event_id=event_id)
+        db.session.add(registration)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'Successfully registered for the event.'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'An error occurred during registration.'}), 500
     
-    return jsonify({'success': True, 'message': 'Successfully registered for the event.'})
-
 # Board Member routes
 @app.route('/board/dashboard')
 @login_required
@@ -300,39 +313,78 @@ def add_event():
     
     return render_template('board/add_event.html', clubs=clubs)
 
-
-@app.route('/board/modify_event/<int:event_id>', methods=['GET', 'POST'])
+@app.route('/board/modify_event', methods=['GET', 'POST'])
 @login_required
-def modify_event(event_id):
+def modify_event():
     if current_user.role != 'board':
         flash('Access denied. You are not a board member.', 'danger')
         return redirect(url_for('index'))
     
-    # Fetch the event to modify
-    event = Event.query.get_or_404(event_id)
+    # Get clubs where user is a board member
+    board_positions = ['chairperson', 'vice chairperson', 'secretary', 'co-secretary']
+    memberships = ClubMember.query.filter(
+        ClubMember.user_id == current_user.id,
+        ClubMember.position.in_(board_positions)
+    ).all()
     
-    # Check if the current user is a board member of the club hosting the event
-    if not is_board_member(event.club_id):
-        flash('You do not have permission to modify this event.', 'danger')
+    club_ids = [m.club_id for m in memberships]
+    
+    # Get events from these clubs
+    events = Event.query.filter(Event.club_id.in_(club_ids)).order_by(Event.date_from).all()
+    
+    if not events:
+        flash('No events found for your clubs/chapters.', 'warning')
         return redirect(url_for('board_dashboard'))
     
-    if request.method == 'POST':
-        # Update event details
-        event.name = request.form.get('name')
-        event.description = request.form.get('description')
-        event.venue = request.form.get('venue')
-        event.date_from = datetime.strptime(request.form.get('date_from'), '%Y-%m-%d').date()
-        event.date_to = datetime.strptime(request.form.get('date_to'), '%Y-%m-%d').date()
-        event.time_from = datetime.strptime(request.form.get('time_from'), '%H:%M').time()
-        event.time_to = datetime.strptime(request.form.get('time_to'), '%H:%M').time()
-        event.poc = request.form.get('poc')
+    event_id = request.args.get('event_id', type=int)
+    event = None
+    
+    if event_id:
+        event = Event.query.get(event_id)
+        if not event or event.club_id not in club_ids:
+            flash('Event not found or you do not have permission to modify it.', 'danger')
+            return redirect(url_for('modify_event'))
+    
+    if request.method == 'POST' and event:
+        name = request.form.get('name')
+        description = request.form.get('description')
+        venue = request.form.get('venue')
+        date_from = request.form.get('date_from')
+        date_to = request.form.get('date_to')
+        time_from = request.form.get('time_from')
+        time_to = request.form.get('time_to')
+        poc = request.form.get('poc')
+        
+        # Validate input
+        if not all([name, description, venue, date_from, date_to, time_from, time_to, poc]):
+            flash('All fields are required', 'danger')
+            return render_template('board/modify_event.html', events=events, event=event)
+        
+        try:
+            date_from_obj = datetime.strptime(date_from, '%Y-%m-%d').date()
+            date_to_obj = datetime.strptime(date_to, '%Y-%m-%d').date()
+            time_from_obj = datetime.strptime(time_from, '%H:%M').time()
+            time_to_obj = datetime.strptime(time_to, '%H:%M').time()
+        except ValueError:
+            flash('Invalid date or time format', 'danger')
+            return render_template('board/modify_event.html', events=events, event=event)
+        
+        # Update event
+        event.name = name
+        event.description = description
+        event.venue = venue
+        event.date_from = date_from_obj
+        event.date_to = date_to_obj
+        event.time_from = time_from_obj
+        event.time_to = time_to_obj
+        event.poc = poc
         
         db.session.commit()
         
-        flash('Event updated successfully!', 'success')
+        flash('Event updated successfully', 'success')
         return redirect(url_for('board_dashboard'))
     
-    return render_template('board/modify_event.html', event=event)
+    return render_template('board/modify_event.html', events=events, event=event)
 
 @app.route('/board/add_club', methods=['GET', 'POST'])
 @login_required
@@ -416,59 +468,61 @@ def modify_club():
     if current_user.role != 'board':
         flash('Access denied. You are not a board member.', 'danger')
         return redirect(url_for('index'))
-
+    
     # Get clubs where user is a board member
     board_positions = ['chairperson', 'vice chairperson', 'secretary', 'co-secretary']
     memberships = ClubMember.query.filter(
         ClubMember.user_id == current_user.id,
         ClubMember.position.in_(board_positions)
     ).all()
+    
     club_ids = [m.club_id for m in memberships]
     clubs = Club.query.filter(Club.id.in_(club_ids)).all()
-
+    
     if not clubs:
         flash('You are not a board member of any club/chapter.', 'warning')
         return redirect(url_for('board_dashboard'))
-
+    
     club_id = request.args.get('club_id', type=int)
     club = None
     club_members = {}
-
+    
     if club_id:
         club = Club.query.get(club_id)
         if not club or club.id not in club_ids:
             flash('Club/Chapter not found or you do not have permission to modify it.', 'danger')
             return redirect(url_for('modify_club'))
-
+        
         # Get current members and their positions
         members = ClubMember.query.filter_by(club_id=club.id).all()
         for member in members:
             user = User.query.get(member.user_id)
             club_members[member.position] = user.username
-
+    
     if request.method == 'POST' and club:
         name = request.form.get('name')
         description = request.form.get('description')
+        
         chairperson = request.form.get('chairperson')
         vice_chairperson = request.form.get('vice_chairperson')
         secretary = request.form.get('secretary')
         co_secretary = request.form.get('co_secretary')
-
+        
         # Validate input
         if not all([name, description, chairperson]):
             flash('Name, description, and chairperson are required', 'danger')
-            return render_template('board/modify_club.html',
-                                clubs=clubs,
-                                club=club,
-                                members=club_members)
-
-        # Update the existing club (no new club created)
+            return render_template('board/modify_club.html', 
+                                 clubs=clubs, 
+                                 club=club, 
+                                 members=club_members)
+        
+        # Update club
         club.name = name
         club.description = description
-
+        
         # Remove all existing members
         ClubMember.query.filter_by(club_id=club.id).delete()
-
+        
         # Add members with new positions
         for position, username in [
             ('chairperson', chairperson),
@@ -487,80 +541,16 @@ def modify_club():
                     db.session.add(member)
                 else:
                     flash(f'User {username} not found. Position {position} not assigned.', 'warning')
-
+        
         db.session.commit()
+        
         flash('Club/Chapter updated successfully', 'success')
         return redirect(url_for('board_dashboard'))
-
-    return render_template('board/modify_club.html',
-                         clubs=clubs,
-                         club=club,
+    
+    return render_template('board/modify_club.html', 
+                         clubs=clubs, 
+                         club=club, 
                          members=club_members)
-
-@app.route('/board/delete_event/<int:event_id>', methods=['POST'])
-@login_required
-def delete_event(event_id):
-    if current_user.role != 'board':
-        flash('Access denied. You are not a board member.', 'danger')
-        return redirect(url_for('index'))
-
-    # Get clubs where user is a board member
-    board_positions = ['chairperson', 'vice chairperson', 'secretary', 'co-secretary']
-    memberships = ClubMember.query.filter(
-        ClubMember.user_id == current_user.id,
-        ClubMember.position.in_(board_positions)
-    ).all()
-    club_ids = [m.club_id for m in memberships]
-
-    event = Event.query.get_or_404(event_id)
-    
-    # Check if user has permission to delete this event
-    if event.club_id not in club_ids:
-        flash('You do not have permission to delete this event.', 'danger')
-        return redirect(url_for('board_dashboard'))
-
-    try:
-        db.session.delete(event)
-        db.session.commit()
-        flash('Event deleted successfully', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash('Error deleting event', 'danger')
-        logging.error(f"Error deleting event: {str(e)}")
-    
-    return redirect(url_for('board_dashboard'))
-
-@app.route('/board/delete_club/<int:club_id>', methods=['POST'])
-@login_required
-def delete_club(club_id):
-    if current_user.role != 'board':
-        flash('Access denied. You are not a board member.', 'danger')
-        return redirect(url_for('index'))
-
-    # Check if user is a board member of this club
-    board_positions = ['chairperson', 'vice chairperson', 'secretary', 'co-secretary']
-    membership = ClubMember.query.filter(
-        ClubMember.user_id == current_user.id,
-        ClubMember.club_id == club_id,
-        ClubMember.position.in_(board_positions)
-    ).first()
-
-    if not membership:
-        flash('You do not have permission to delete this club/chapter.', 'danger')
-        return redirect(url_for('board_dashboard'))
-
-    club = Club.query.get_or_404(club_id)
-    
-    try:
-        db.session.delete(club)
-        db.session.commit()
-        flash(f'{club.type.capitalize()} deleted successfully', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Error deleting {club.type}', 'danger')
-        logging.error(f"Error deleting club: {str(e)}")
-    
-    return redirect(url_for('board_dashboard'))
 
 # DSW routes
 @app.route('/dsw/dashboard')
@@ -705,3 +695,16 @@ def get_club(club_id):
         'description': club.description,
         'members': members
     })
+
+# ch5
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template('403.html'), 403
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500

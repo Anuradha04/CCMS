@@ -30,7 +30,7 @@
                     <i class="bi bi-pencil-square"></i>
                 </div>
                 <div class="stats-label">Modify Event</div>
-                <a href="{{ url_for('modify_event', event_id=event.id) }}" class="btn btn-outline-warning mt-3">Edit Existing</a>
+                <a href="{{ url_for('modify_event') }}" class="btn btn-outline-warning mt-3">Edit Existing</a>
             </div>
         </div>
     </div>
@@ -90,9 +90,6 @@
                     <div class="card-footer d-flex justify-content-between">
                         <a href="{{ url_for('add_event') }}" class="btn btn-sm btn-outline-primary">Add Event</a>
                         <a href="{{ url_for('modify_club', club_id=club.id) }}" class="btn btn-sm btn-outline-secondary">Edit Details</a>
-                        <form method="POST" action="{{ url_for('delete_club', club_id=club.id) }}" onsubmit="return confirm('Are you sure you want to delete this {{ club.type }}? This action cannot be undone.');">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                        </form>
                     </div>
                 </div>
             </div>
@@ -146,10 +143,8 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{{ url_for('modify_event', event_id=event.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-                                    <form method="POST" action="{{ url_for('delete_event', event_id=event.id) }}" onsubmit="return confirm('Are you sure you want to delete this event? This action cannot be undone.');" style="display: inline;">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                                    </form>
+                                    <a href="{{ url_for('modify_event', event_id=event.id) }}" 
+                                       class="btn btn-sm btn-outline-primary">Edit</a>
                                 </td>
                             </tr>
                         {% endfor %}

@@ -117,9 +117,6 @@
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-save"></i> Update Event
                         </button>
-                        <button type="button" class="btn btn-danger" onclick="confirmDeleteEvent()">
-                            <i class="bi bi-trash"></i> Delete Event
-                        </button>
                     </div>
                 </form>
             </div>
@@ -136,16 +133,110 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ url_for('static', filename='js/board.js') }}">
-    function confirmDeleteEvent() {
-    if (confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
-        // Submit a form to delete the event
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = "{{ url_for('delete_event', event_id=event.id) }}";
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-</script>
+<script src="{{ url_for('static', filename='js/board.js') }}"></script>
+{% endblock %}
+Templates/board/add_clubs.html
+{% extends 'base.html' %}
+
+{% block title %}Add Club/Chapter - CCMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-4">Add New Club/Chapter</h2>
+        <p class="lead">Create a new club or chapter organization.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Club/Chapter Information</h5>
+            </div>
+            <div class="card-body">
+                <form id="add-club-form" method="POST" action="{{ url_for('add_club') }}" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="club-name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="club-name" name="name" required>
+                        <div class="invalid-feedback">
+                            Please enter a name.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="club-type" class="form-label">Type</label>
+                        <select class="form-select" id="club-type" name="type" required>
+                            <option value="" selected disabled>Select Type</option>
+                            <option value="club">Club</option>
+                            <option value="chapter">Chapter</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a type.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="club-description" class="form-label">Description</label>
+                        <textarea class="form-control" id="club-description" name="description" rows="4" required></textarea>
+                        <div class="invalid-feedback">
+                            Please enter a description.
+                        </div>
+                    </div>
+                    
+                    <h5 class="mt-4 mb-3">Board Members</h5>
+                    
+                    <div class="mb-3">
+                        <label for="club-chairperson" class="form-label">Chairperson</label>
+                        <input type="text" class="form-control" id="club-chairperson" name="chairperson" 
+                               placeholder="Enter username" required>
+                        <div class="invalid-feedback">
+                            Please enter a chairperson username.
+                        </div>
+                        <small class="form-text text-muted">
+                            Enter the exact username of the chairperson.
+                        </small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="club-vice-chairperson" class="form-label">Vice Chairperson</label>
+                        <input type="text" class="form-control" id="club-vice-chairperson" name="vice_chairperson" 
+                               placeholder="Enter username (optional)">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="club-secretary" class="form-label">Secretary</label>
+                        <input type="text" class="form-control" id="club-secretary" name="secretary" 
+                               placeholder="Enter username (optional)">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="club-co-secretary" class="form-label">Co-Secretary</label>
+                        <input type="text" class="form-control" id="club-co-secretary" name="co_secretary" 
+                               placeholder="Enter username (optional)">
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button type="button" id="preview-club-btn" class="btn btn-outline-secondary">
+                            <i class="bi bi-eye"></i> Preview
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Create Club/Chapter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div id="club-preview" class="preview-container d-none">
+            <!-- Preview content will be inserted here by JavaScript -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/board.js') }}"></script>
 {% endblock %}
