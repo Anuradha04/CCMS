@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}Modify Club/Chapter - CCMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-4">Modify Club/Chapter</h2>
+        <p class="lead">Update information for an existing club or chapter.</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Select Club/Chapter to Modify</h5>
+            </div>
+            <div class="card-body">
+                <form id="select-club-form">
+                    <div class="mb-3">
+                        <label for="club-select" class="form-label">Select Club/Chapter</label>
+                        <select class="form-select" id="club-select" name="club_id">
+                            <option value="" selected disabled>Choose a club/chapter to modify</option>
+                            {% for c in clubs %}
+                                <option value="{{ c.id }}" {% if club and club.id == c.id %}selected{% endif %}>
+                                    {{ c.name }} ({{ c.type|capitalize }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if club %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Club/Chapter Information</h5>
+            </div>
+            <div class="card-body">
+                <form id="modify-club-form" method="POST" action="{{ url_for('modify_club', club_id=club.id) }}" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="club-name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="club-name" name="name" value="{{ club.name }}" required>
+                        <div class="invalid-feedback">
+                            Please enter a name.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Type</label>
+                        <input type="text" class="form-control" value="{{ club.type|capitalize }}" readonly>
+                        <small class="form-text text-muted">
+                            Club/Chapter type cannot be changed after creation.
+                        </small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="club-description" class="form-label">Description</label>
+                        <textarea class="form-control" id="club-description" name="description" rows="4" required>{{ club.description }}</textarea>
+                        <div class="invalid-feedback">
+                            Please enter a description.
+                        </div>
+                    </div>
+                    
+                    <h5 class="mt-4 mb-3">Board Members</h5>
+                    
+                    <div class="mb-3">
+                        <label for="club-chairperson" class="form-label">Chairperson</label>
+                        <input type="text" class="form-control" id="club-chairperson" name="chairperson" 
+                               value="{{ members.get('chairperson', '') }}" required>
+                        <div class="invalid-feedback">
+                            Please enter a chairperson username.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="club-vice-chairperson" class="form-label">Vice Chairperson</label>
+                        <input type="text" class="form-control" id="club-vice-chairperson" name="vice_chairperson" 
+                               value="{{ members.get('vice chairperson', '') }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="club-secretary" class="form-label">Secretary</label>
+                        <input type="text" class="form-control" id="club-secretary" name="secretary" 
+                               value="{{ members.get('secretary', '') }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="club-co-secretary" class="form-label">Co-Secretary</label>
+                        <input type="text" class="form-control" id="club-co-secretary" name="co_secretary" 
+                               value="{{ members.get('co-secretary', '') }}">
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button type="button" id="preview-club-btn" class="btn btn-outline-secondary">
+                            <i class="bi bi-eye"></i> Preview
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Update Club/Chapter
+                        </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div id="club-preview" class="preview-container d-none">
+            <div class="preview-title">Club/Chapter Preview</div>
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0" id="preview-club-name">Club Name</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text" id="preview-club-description">Club Description</p>
+                    <h6 class="mt-4 mb-3">Board Members</h6>
+                    <div class="mb-2">
+                        <strong>Chairperson:</strong> <span id="preview-chairperson">Not specified</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Vice Chairperson:</strong> <span id="preview-vice-chairperson">Not specified</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Secretary:</strong> <span id="preview-secretary">Not specified</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Co-Secretary:</strong> <span id="preview-co-secretary">Not specified</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize club selection for modification
+    const clubSelect = document.getElementById('club-select');
+    if (clubSelect) {
+        clubSelect.addEventListener('change', function() {
+            const clubId = this.value;
+            if (clubId) {
+                // Redirect to the modify page with the selected club ID
+                window.location.href = `/board/modify_club?club_id=${clubId}`;
+            }
+        });
+    }
+
+    // Initialize preview functionality for club form
+    const previewButton = document.getElementById('preview-club-btn');
+    const previewContainer = document.getElementById('club-preview');
+    if (previewButton && previewContainer) {
+        previewButton.addEventListener('click', function(event) {
+            event.preventDefault();
+
+            // Get form values
+            const name = document.getElementById('club-name').value || 'Club Name';
+            const description = document.getElementById('club-description').value || 'Club Description';
+            const chairperson = document.getElementById('club-chairperson').value || 'Not specified';
+            const viceChairperson = document.getElementById('club-vice-chairperson').value || 'Not specified';
+            const secretary = document.getElementById('club-secretary').value || 'Not specified';
+            const coSecretary = document.getElementById('club-co-secretary').value || 'Not specified';
+
+            // Update preview content
+            document.getElementById('preview-club-name').textContent = name;
+            document.getElementById('preview-club-description').textContent = description;
+            document.getElementById('preview-chairperson').textContent = chairperson;
+            document.getElementById('preview-vice-chairperson').textContent = viceChairperson;
+            document.getElementById('preview-secretary').textContent = secretary;
+            document.getElementById('preview-co-secretary').textContent = coSecretary;
+
+            // Show preview container
+            previewContainer.classList.remove('d-none');
+            previewContainer.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+});
+</script>
+{% endblock %}

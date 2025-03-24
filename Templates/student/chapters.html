@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Chapters - CCMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-4">Campus Chapters</h2>
+        <p class="lead">Explore and join various professional chapters on campus.</p>
+    </div>
+</div>
+
+<!-- Chapters List -->
+<div class="row">
+    {% if chapters %}
+        {% for chapter in chapters %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 club-card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">{{ chapter.name }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{{ chapter.description }}</p>
+                        
+                        <h6 class="mt-4 mb-3">Board Members</h6>
+                        <ul class="list-unstyled">
+                            {% for member in chapter.members %}
+                                {% if member.position in ['chairperson', 'vice chairperson', 'secretary', 'co-secretary'] %}
+                                    <li class="mb-2">
+                                        <strong>{{ member.position|capitalize }}:</strong> 
+                                        {{ member.user.username }}
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                        
+                        <h6 class="mt-4 mb-3">Upcoming Events</h6>
+                        {% set upcoming_events = chapter.events|selectattr('date_from', 'ge', now().date())|list %}
+                        {% if upcoming_events %}
+                            <ul class="list-unstyled">
+                                {% for event in upcoming_events[:3] %}
+                                    <li class="mb-2">
+                                        <i class="bi bi-calendar-event"></i> 
+                                        {{ event.name }} ({{ event.date_from.strftime('%b %d') }})
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            {% if upcoming_events|length > 3 %}
+                                <small class="text-muted">And {{ upcoming_events|length - 3 }} more events...</small>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-muted small">No upcoming events</p>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer">
+                        <a href="{{ url_for('student_events', club_id=chapter.id) }}" class="btn btn-outline-primary">
+                            View Chapter Events
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="col">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-diagram-3-fill"></i>
+                </div>
+                <div class="empty-state-text">No chapters available at the moment</div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

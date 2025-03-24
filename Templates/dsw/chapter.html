@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Chapters Management - CCMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-4">Chapters Management</h2>
+        <p class="lead">Monitor all campus professional chapters and ensure adherence to guidelines.</p>
+    </div>
+</div>
+
+<!-- Chapters List -->
+<div class="row">
+    {% if chapters %}
+        {% for chapter in chapters %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">{{ chapter.name }}</h5>
+                        <span class="badge bg-info">Chapter</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{{ chapter.description }}</p>
+                        
+                        <div class="mt-4">
+                            <h6 class="mb-3">Board Members</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Position</th>
+                                            <th>Name</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for member in chapter_members.get(chapter.id, []) %}
+                                            <tr>
+                                                <td><strong>{{ member.position|capitalize }}</strong></td>
+                                                <td>{{ member.username }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h6 class="mb-3">Chapter Activity</h6>
+                            <div class="d-flex justify-content-between text-center">
+                                <div>
+                                    <h5>{{ chapter.events|length }}</h5>
+                                    <small class="text-muted">Total Events</small>
+                                </div>
+                                <div>
+                                    <h5>{{ chapter.events|selectattr('date_from', 'ge', now().date())|list|length }}</h5>
+                                    <small class="text-muted">Upcoming</small>
+                                </div>
+                                <div>
+                                    <h5>{{ chapter.members|length }}</h5>
+                                    <small class="text-muted">Members</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{{ url_for('dsw_events', club_id=chapter.id) }}" class="btn btn-outline-primary">
+                            View Chapter Events
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="col">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-diagram-3-fill"></i>
+                </div>
+                <div class="empty-state-text">No chapters have been created yet</div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Guidelines Section -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Chapter Guidelines</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="mb-3">Requirements for Professional Chapters</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Affiliation with a national/international professional organization</li>
+                            <li class="list-group-item">Minimum of 15 active student members</li>
+                            <li class="list-group-item">Faculty advisor with relevant professional background</li>
+                            <li class="list-group-item">Annual plan of professional development activities</li>
+                            <li class="list-group-item">Compliance with parent organization bylaws</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="mb-3">Chapter Responsibilities</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Organize at least 2 professional development events per semester</li>
+                            <li class="list-group-item">Maintain communication with national/international organization</li>
+                            <li class="list-group-item">Provide networking opportunities for students</li>
+                            <li class="list-group-item">Submit semester reports of activities and membership</li>
+                            <li class="list-group-item">Participate in campus-wide professional development programs</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

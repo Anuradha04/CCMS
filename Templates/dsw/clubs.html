@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Clubs Management - CCMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-4">Clubs Management</h2>
+        <p class="lead">Monitor all campus clubs and ensure adherence to guidelines.</p>
+    </div>
+</div>
+
+<!-- Clubs List -->
+<div class="row">
+    {% if clubs %}
+        {% for club in clubs %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">{{ club.name }}</h5>
+                        <span class="badge bg-primary">Club</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{{ club.description }}</p>
+                        
+                        <div class="mt-4">
+                            <h6 class="mb-3">Board Members</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Position</th>
+                                            <th>Name</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for member in club_members.get(club.id, []) %}
+                                            <tr>
+                                                <td><strong>{{ member.position|capitalize }}</strong></td>
+                                                <td>{{ member.username }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h6 class="mb-3">Club Activity</h6>
+                            <div class="d-flex justify-content-between text-center">
+                                <div>
+                                    <h5>{{ club.events|length }}</h5>
+                                    <small class="text-muted">Total Events</small>
+                                </div>
+                                <div>
+                                    <h5>{{ club.events|selectattr('date_from', 'ge', now().date())|list|length }}</h5>
+                                    <small class="text-muted">Upcoming</small>
+                                </div>
+                                <div>
+                                    <h5>{{ club.members|length }}</h5>
+                                    <small class="text-muted">Members</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{{ url_for('dsw_events', club_id=club.id) }}" class="btn btn-outline-primary">
+                            View Club Events
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="col">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="empty-state-text">No clubs have been created yet</div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Guidelines Section -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Club Guidelines</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="mb-3">Requirements for Official Recognition</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Minimum of 10 active members</li>
+                            <li class="list-group-item">Elected board with chairperson, secretary, and treasurer</li>
+                            <li class="list-group-item">Written constitution and bylaws</li>
+                            <li class="list-group-item">Faculty advisor approval</li>
+                            <li class="list-group-item">Regular meeting schedule</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="mb-3">Event Organization Guidelines</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Events must be submitted at least 2 weeks in advance</li>
+                            <li class="list-group-item">Venue booking must be confirmed before advertising</li>
+                            <li class="list-group-item">Budget approval required for funded events</li>
+                            <li class="list-group-item">Post-event report submission within 1 week</li>
+                            <li class="list-group-item">Adherence to campus safety regulations</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

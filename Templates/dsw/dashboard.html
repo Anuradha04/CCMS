@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+
+{% block title %}DSW Dashboard - CCMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-4">DSW Administration Dashboard</h2>
+        <p class="lead">Monitor and manage campus club activities and events.</p>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-5">
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 stats-card bg-primary bg-opacity-25">
+            <div class="card-body text-center">
+                <div class="stats-icon">
+                    <i class="bi bi-calendar-event"></i>
+                </div>
+                <div class="stats-value">{{ upcoming_events }}</div>
+                <div class="stats-label">Upcoming Events</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 stats-card bg-success bg-opacity-25">
+            <div class="card-body text-center">
+                <div class="stats-icon">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <div class="stats-value">{{ past_events }}</div>
+                <div class="stats-label">Past Events</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 stats-card bg-info bg-opacity-25">
+            <div class="card-body text-center">
+                <div class="stats-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="stats-value">{{ clubs_count }}</div>
+                <div class="stats-label">Clubs</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 stats-card bg-warning bg-opacity-25">
+            <div class="card-body text-center">
+                <div class="stats-icon">
+                    <i class="bi bi-diagram-3-fill"></i>
+                </div>
+                <div class="stats-value">{{ chapters_count }}</div>
+                <div class="stats-label">Chapters</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Links -->
+<div class="row mb-5">
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Event Management</h5>
+                <p class="card-text">View and monitor all campus events. Ensure events follow university guidelines.</p>
+                <a href="{{ url_for('dsw_events') }}" class="btn btn-primary">View Events</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Club Management</h5>
+                <p class="card-text">Oversee all campus clubs. Monitor membership and activities.</p>
+                <a href="{{ url_for('dsw_clubs') }}" class="btn btn-success">View Clubs</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Chapter Management</h5>
+                <p class="card-text">Supervise professional chapters. Ensure compliance with guidelines.</p>
+                <a href="{{ url_for('dsw_chapters') }}" class="btn btn-info">View Chapters</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Events -->
+<h3 class="mb-4">Recent Events</h3>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                {% if recent_events %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Event Name</th>
+                                    <th>Organizer</th>
+                                    <th>Date</th>
+                                    <th>Venue</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in recent_events %}
+                                    <tr>
+                                        <td>{{ event.name }}</td>
+                                        <td>{{ event.club.name }}</td>
+                                        <td>
+                                            {{ event.date_from.strftime('%b %d, %Y') }}
+                                            {% if event.date_from != event.date_to %}
+                                                to {{ event.date_to.strftime('%b %d, %Y') }}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ event.venue }}</td>
+                                        <td>
+                                            {% set today = now().date() %}
+                                            {% if event.date_from <= today and event.date_to >= today %}
+                                                <span class="badge badge-ongoing">Ongoing</span>
+                                            {% elif event.date_from > today %}
+                                                <span class="badge badge-upcoming">Upcoming</span>
+                                            {% else %}
+                                                {% extends 'base.html' %}
+
+{% block title %}DSW Dashboard - CCMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-4">Department of Student Welfare Dashboard</h2>
+        <p class="lead">Monitor campus clubs, chapters, and events to ensure adherence to guidelines.</p>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-5">
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 stats-card bg-primary bg-opacity-25">
+            <div class="card-body text-center">
+                <div class="stats-icon">
+                    <i class="bi bi-calendar-event"></i>
+                </div>
+                <div class="stats-value">{{ upcoming_events }}</div>
+                <div class="stats-label">Upcoming Events</div>
+                <a href="{{ url_for('dsw_events') }}" class="btn btn-outline-primary mt-3">View Details</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 stats-card bg-success bg-opacity-25">
+            <div class="card-body text-center">
+                <div class="stats-icon">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div class="stats-value">{{ past_events }}</div>
+                <div class="stats-label">Past Events</div>
+                <a href="{{ url_for('dsw_events') }}" class="btn btn-outline-success mt-3">View History</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 stats-card bg-info bg-opacity-25">
+            <div class="card-body text-center">
+                <div class="stats-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="stats-value">{{ clubs_count }}</div>
+                <div class="stats-label">Active Clubs</div>
+                <a href="{{ url_for('dsw_clubs') }}" class="btn btn-outline-info mt-3">Manage Clubs</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 stats-card bg-warning bg-opacity-25">
+            <div class="card-body text-center">
+                <div class="stats-icon">
+                    <i class="bi bi-diagram-3-fill"></i>
+                </div>
+                <div class="stats-value">{{ chapters_count }}</div>
+                <div class="stats-label">Active Chapters</div>
+                <a href="{{ url_for('dsw_chapters') }}" class="btn btn-outline-warning mt-3">Manage Chapters</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Events</h5>
+                <a href="{{ url_for('dsw_events') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_events %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Event Name</th>
+                                    <th>Club/Chapter</th>
+                                    <th>Date</th>
+                                    <th>Venue</th>
+                                    <th>Status</th>
+                                    <th>Creator</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in recent_events %}
+                                    <tr>
+                                        <td>{{ event.name }}</td>
+                                        <td>{{ event.club.name }} ({{ event.club.type|capitalize }})</td>
+                                        <td>
+                                            {{ event.date_from.strftime('%b %d, %Y') }}
+                                            {% if event.date_from != event.date_to %}
+                                                <br>to {{ event.date_to.strftime('%b %d, %Y') }}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ event.venue }}</td>
+                                        <td>
+                                            {% set today = now().date() %}
+                                            {% if event.date_from <= today and event.date_to >= today %}
+                                                <span class="badge badge-ongoing">Ongoing</span>
+                                            {% elif event.date_from > today %}
+                                                <span class="badge badge-upcoming">Upcoming</span>
+                                            {% else %}
+                                                <span class="badge badge-past">Past</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ event.creator.username }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <p class="mb-0">No recent events found.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-5">
+    <div class="col-12">
+        <h4 class="mb-3">Quick Actions</h4>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Events Management</h5>
+                <p class="card-text">View and monitor all campus events, filter by date, club, or status.</p>
+                <a href="{{ url_for('dsw_events') }}" class="btn btn-primary">Manage Events</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Clubs Management</h5>
+                <p class="card-text">Review club activities, board members, and event history.</p>
+                <a href="{{ url_for('dsw_clubs') }}" class="btn btn-primary">Manage Clubs</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Chapters Management</h5>
+                <p class="card-text">Monitor professional chapter operations and leadership.</p>
+                <a href="{{ url_for('dsw_chapters') }}" class="btn btn-primary">Manage Chapters</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

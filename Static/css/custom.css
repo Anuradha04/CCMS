@@ -1,0 +1,117 @@
+/* Custom styles to complement Bootstrap */
+
+/* Main wrapper with min-height for sticky footer */
+.content-wrapper {
+    min-height: calc(100vh - 56px - 70px); /* 100vh - navbar height - footer height */
+}
+
+/* Navbar custom styles */
+.navbar-brand {
+    font-weight: 700;
+}
+
+.nav-tabs .nav-link {
+    font-weight: 500;
+}
+
+/* Card hover effects */
+.card-hover:hover {
+    transform: translateY(-5px);
+    transition: transform 0.3s ease;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+}
+
+/* Form styles */
+.form-error-text {
+    color: var(--bs-danger);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Event and club list styling */
+.event-card, .club-card {
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.event-card:hover, .club-card:hover {
+    border-color: var(--bs-primary);
+}
+
+/* Custom badge colors */
+.badge-ongoing {
+    background-color: var(--bs-success);
+}
+
+.badge-upcoming {
+    background-color: var(--bs-info);
+}
+
+.badge-past {
+    background-color: var(--bs-secondary);
+}
+
+/* Dashboard stats */
+.stats-card {
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: scale(1.03);
+}
+
+.stats-card .card-body {
+    padding: 1.5rem;
+}
+
+.stats-card .stats-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+.stats-card .stats-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stats-card .stats-label {
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Preview area */
+.preview-container {
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    background-color: var(--bs-body-bg);
+}
+
+.preview-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--bs-primary);
+}
+
+/* Empty state message */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--bs-gray-500);
+}
+
+.empty-state-text {
+    font-size: 1.25rem;
+    color: var(--bs-gray-600);
+    margin-bottom: 1.5rem;
+}

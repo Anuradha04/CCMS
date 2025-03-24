@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}Events Management - CCMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-4">Events Management</h2>
+        <p class="lead">Monitor all campus events and ensure adherence to guidelines.</p>
+    </div>
+</div>
+
+<!-- Event Filters -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Filter Events</h5>
+            </div>
+            <div class="card-body">
+                <form id="event-filter-form" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="filter-club" class="form-label">Club/Chapter</label>
+                        <select class="form-select" id="filter-club" name="club_id">
+                            <option value="">All Clubs & Chapters</option>
+                            {% for club in clubs %}
+                                <option value="{{ club.id }}" 
+                                    {% if request.args.get('club_id')|int == club.id %}selected{% endif %}>
+                                    {{ club.name }} ({{ club.type|capitalize }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="filter-date" class="form-label">From Date</label>
+                        <input type="date" class="form-control" id="filter-date" name="date_from"
+                               value="{{ request.args.get('date_from', '') }}">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Events Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">All Events</h5>
+            </div>
+            <div class="card-body">
+                {% if events %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Event Name</th>
+                                    <th>Club/Chapter</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Venue</th>
+                                    <th>Status</th>
+                                    <th>Creator</th>
+                                    <th>Point of Contact</th>
+                                    <th>Registrations</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in events %}
+                                    <tr>
+                                        <td>{{ event.name }}</td>
+                                        <td>{{ event.club.name }}</td>
+                                        <td>
+                                            {{ event.date_from.strftime('%b %d, %Y') }}
+                                            {% if event.date_from != event.date_to %}
+                                                <br>to {{ event.date_to.strftime('%b %d, %Y') }}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {{ event.time_from.strftime('%I:%M %p') }} to 
+                                            {{ event.time_to.strftime('%I:%M %p') }}
+                                        </td>
+                                        <td>{{ event.venue }}</td>
+                                        <td>
+                                            {% set today = now().date() %}
+                                            {% if event.date_from <= today and event.date_to >= today %}
+                                                <span class="badge badge-ongoing">Ongoing</span>
+                                            {% elif event.date_from > today %}
+                                                <span class="badge badge-upcoming">Upcoming</span>
+                                            {% else %}
+                                                <span class="badge badge-past">Past</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ event.creator.username }}</td>
+                                        <td>{{ event.poc }}</td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ event.registrations|length }}</span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="bi bi-calendar-x"></i>
+                        </div>
+                        <div class="empty-state-text">No events found matching your criteria</div>
+                        <a href="{{ url_for('dsw_events') }}" class="btn btn-primary">Clear Filters</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Statistics -->
+<div class="row mt-5">
+    <div class="col-12">
+        <h4 class="mb-3">Event Statistics</h4>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card bg-primary bg-opacity-25 text-center">
+            <div class="card-body">
+                <h5 class="card-title">Upcoming Events</h5>
+                <p class="display-4">{{ events|selectattr('date_from', 'ge', now().date())|list|length }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card bg-success bg-opacity-25 text-center">
+            <div class="card-body">
+                <h5 class="card-title">Ongoing Events</h5>
+                {% set today = now().date() %}
+                <p class="display-4">
+                    {{ events|selectattr('date_from', 'le', today)|selectattr('date_to', 'ge', today)|list|length }}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card bg-secondary bg-opacity-25 text-center">
+            <div class="card-body">
+                <h5 class="card-title">Past Events</h5>
+                <p class="display-4">{{ events|selectattr('date_to', 'lt', now().date())|list|length }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Club and Chapter Management System{% endblock %}</title>
+    
+    <!-- Bootstrap CSS (Replit Dark Theme) -->
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url_for('index') }}">
+                    <i class="bi bi-diagram-3-fill me-2"></i>
+                    CCMS
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        {% if current_user.is_authenticated %}
+                            {% if current_user.role == 'student' %}
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'student_dashboard' %}active{% endif %}" 
+                                        href="{{ url_for('student_dashboard') }}">Dashboard</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'student_events' %}active{% endif %}" 
+                                        href="{{ url_for('student_events') }}">Events</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'student_clubs' %}active{% endif %}" 
+                                        href="{{ url_for('student_clubs') }}">Clubs</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'student_chapters' %}active{% endif %}" 
+                                        href="{{ url_for('student_chapters') }}">Chapters</a>
+                                </li>
+                            {% elif current_user.role == 'board' %}
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'board_dashboard' %}active{% endif %}" 
+                                        href="{{ url_for('board_dashboard') }}">Dashboard</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'add_event' %}active{% endif %}" 
+                                        href="{{ url_for('add_event') }}">Add Event</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'modify_event' %}active{% endif %}" 
+                                        href="{{ url_for('modify_event') }}">Modify Event</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'add_club' %}active{% endif %}" 
+                                        href="{{ url_for('add_club') }}">Add Club/Chapter</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'modify_club' %}active{% endif %}" 
+                                        href="{{ url_for('modify_club') }}">Modify Club/Chapter</a>
+                                </li>
+                            {% elif current_user.role == 'dsw' %}
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'dsw_dashboard' %}active{% endif %}" 
+                                        href="{{ url_for('dsw_dashboard') }}">Dashboard</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'dsw_events' %}active{% endif %}" 
+                                        href="{{ url_for('dsw_events') }}">Events</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'dsw_clubs' %}active{% endif %}" 
+                                        href="{{ url_for('dsw_clubs') }}">Clubs</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'dsw_chapters' %}active{% endif %}" 
+                                        href="{{ url_for('dsw_chapters') }}">Chapters</a>
+                                </li>
+                            {% endif %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" 
+                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle me-1"></i>{{ current_user.username }}
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li><a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a></li>
+                                </ul>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.endpoint == 'login' %}active{% endif %}" 
+                                   href="{{ url_for('login') }}">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.endpoint == 'register' %}active{% endif %}" 
+                                   href="{{ url_for('register') }}">Register</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="py-4 content-wrapper">
+        <div class="container">
+            <!-- Flash Messages -->
+            <div id="alerts-container">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+            
+            <!-- Page Content -->
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Clubs and Chapter Management System</h5>
+                    <p class="mb-0">A comprehensive platform for managing VIT clubs/chapters and events.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">&copy; 2025 CCMS. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

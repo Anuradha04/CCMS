@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}Modify Event - CCMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-4">Modify Event</h2>
+        <p class="lead">Update information for an existing event.</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Select Event to Modify</h5>
+            </div>
+            <div class="card-body">
+                <form id="select-event-form">
+                    <div class="mb-3">
+                        <label for="event-select" class="form-label">Select Event</label>
+                        <select class="form-select" id="event-select" name="event_id">
+                            <option value="" selected disabled>Choose an event to modify</option>
+                            {% for evt in events %}
+                                <option value="{{ evt.id }}" {% if event and event.id == evt.id %}selected{% endif %}>
+                                    {{ evt.name }} ({{ evt.date_from.strftime('%b %d, %Y') }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if event %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Event Information</h5>
+            </div>
+            <div class="card-body">
+                <form id="modify-event-form" method="POST" action="{{ url_for('modify_event', event_id=event.id) }}" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="event-name" class="form-label">Event Name</label>
+                        <input type="text" class="form-control" id="event-name" name="name" value="{{ event.name }}" required>
+                        <div class="invalid-feedback">
+                            Please enter an event name.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="event-description" class="form-label">Event Description</label>
+                        <textarea class="form-control" id="event-description" name="description" rows="4" required>{{ event.description }}</textarea>
+                        <div class="invalid-feedback">
+                            Please enter an event description.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="event-venue" class="form-label">Venue</label>
+                        <input type="text" class="form-control" id="event-venue" name="venue" value="{{ event.venue }}" required>
+                        <div class="invalid-feedback">
+                            Please enter an event venue.
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="event-date-from" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="event-date-from" name="date_from" value="{{ event.date_from.strftime('%Y-%m-%d') }}" required>
+                            <div class="invalid-feedback">
+                                Please select a start date.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="event-date-to" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="event-date-to" name="date_to" value="{{ event.date_to.strftime('%Y-%m-%d') }}" required>
+                            <div class="invalid-feedback">
+                                Please select an end date.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="event-time-from" class="form-label">Start Time</label>
+                            <input type="time" class="form-control" id="event-time-from" name="time_from" value="{{ event.time_from.strftime('%H:%M') }}" required>
+                            <div class="invalid-feedback">
+                                Please select a start time.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="event-time-to" class="form-label">End Time</label>
+                            <input type="time" class="form-control" id="event-time-to" name="time_to" value="{{ event.time_to.strftime('%H:%M') }}" required>
+                            <div class="invalid-feedback">
+                                Please select an end time.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="event-poc" class="form-label">Point of Contact</label>
+                        <input type="text" class="form-control" id="event-poc" name="poc" value="{{ event.poc }}" required>
+                        <div class="invalid-feedback">
+                            Please enter a point of contact.
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button type="button" id="preview-event-btn" class="btn btn-outline-secondary">
+                            <i class="bi bi-eye"></i> Preview
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Update Event
+                        </button>
+                        <button type="button" class="btn btn-danger" onclick="confirmDeleteEvent()">
+                            <i class="bi bi-trash"></i> Delete Event
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div id="event-preview" class="preview-container d-none">
+            <!-- Preview content will be inserted here by JavaScript -->
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/board.js') }}">
+    function confirmDeleteEvent() {
+    if (confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+        // Submit a form to delete the event
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{{ url_for('delete_event', event_id=event.id) }}";
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

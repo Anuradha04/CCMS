@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Event - CCMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-4">Add New Event</h2>
+        <p class="lead">Create a new event for your club or chapter.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Event Information</h5>
+            </div>
+            <div class="card-body">
+                <form id="add-event-form" method="POST" action="{{ url_for('add_event') }}" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="club-id" class="form-label">Club/Chapter</label>
+                        <select class="form-select" id="club-id" name="club_id" required>
+                            <option value="" selected disabled>Select Club/Chapter</option>
+                            {% for club in clubs %}
+                                <option value="{{ club.id }}">{{ club.name }} ({{ club.type|capitalize }})</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a club or chapter.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="event-name" class="form-label">Event Name</label>
+                        <input type="text" class="form-control" id="event-name" name="name" required>
+                        <div class="invalid-feedback">
+                            Please enter an event name.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="event-description" class="form-label">Event Description</label>
+                        <textarea class="form-control" id="event-description" name="description" rows="4" required></textarea>
+                        <div class="invalid-feedback">
+                            Please enter an event description.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="event-venue" class="form-label">Venue</label>
+                        <input type="text" class="form-control" id="event-venue" name="venue" required>
+                        <div class="invalid-feedback">
+                            Please enter an event venue.
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="event-date-from" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="event-date-from" name="date_from" required>
+                            <div class="invalid-feedback">
+                                Please select a start date.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="event-date-to" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="event-date-to" name="date_to" required>
+                            <div class="invalid-feedback">
+                                Please select an end date.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="event-time-from" class="form-label">Start Time</label>
+                            <input type="time" class="form-control" id="event-time-from" name="time_from" required>
+                            <div class="invalid-feedback">
+                                Please select a start time.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="event-time-to" class="form-label">End Time</label>
+                            <input type="time" class="form-control" id="event-time-to" name="time_to" required>
+                            <div class="invalid-feedback">
+                                Please select an end time.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="event-poc" class="form-label">Point of Contact</label>
+                        <input type="text" class="form-control" id="event-poc" name="poc" required>
+                        <div class="invalid-feedback">
+                            Please enter a point of contact.
+                        </div>
+                        <small class="form-text text-muted">
+                            Person responsible for this event whom attendees can contact.
+                        </small>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button type="button" id="preview-event-btn" class="btn btn-outline-secondary">
+                            <i class="bi bi-eye"></i> Preview
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Create Event
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div id="event-preview" class="preview-container d-none">
+            <!-- Preview content will be inserted here by JavaScript -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/board.js') }}"></script>
+{% endblock %}
