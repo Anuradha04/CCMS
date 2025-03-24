@@ -18,6 +18,7 @@
             </div>
             <div class="card-body">
                 <form id="add-event-form" method="POST" action="{{ url_for('add_event') }}" class="needs-validation" novalidate>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3">
                         <label for="club-id" class="form-label">Club/Chapter</label>
                         <select class="form-select" id="club-id" name="club_id" required>

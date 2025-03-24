@@ -3,9 +3,12 @@ from datetime import datetime
 from flask import render_template, request, redirect, url_for, flash, jsonify, abort
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash
+from flask_wtf.csrf import validate_csrf
+from wtforms import ValidationError
 
 from app import app, db
 from models import User, Event, Club, ClubMember, Registration
+
 
 # Helper function to check if user has board member role in a club
 def is_board_member(club_id=None):
@@ -346,6 +349,9 @@ def modify_event():
             return redirect(url_for('modify_event'))
     
     if request.method == 'POST' and event:
+        if not validate_csrf(request.form.get('csrf_token')):
+            abort(400, description="CSRF token missing or invalid")
+
         name = request.form.get('name')
         description = request.form.get('description')
         venue = request.form.get('venue')
@@ -676,6 +682,14 @@ def get_event(event_id):
         'poc': event.poc,
         'club_id': event.club_id
     })
+@app.route('/api/event/<int:event_id>', methods=['POST'])
+@login_required
+def api_event(event_id):
+    try:
+        validate_csrf(request.headers.get('X-CSRFToken'))
+    except:
+        abort(400, "Invalid CSRF token")
+    return jsonify({'success': True})
 
 @app.route('/api/club/<int:club_id>')
 @login_required

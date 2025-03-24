@@ -18,9 +18,10 @@
             </div>
             <div class="card-body">
                 <form id="select-event-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3">
                         <label for="event-select" class="form-label">Select Event</label>
-                        <select class="form-select" id="event-select" name="event_id">
+                        <select class="form-select" id="event-select" name="event_id" onchange="this.form.submit()">
                             <option value="" selected disabled>Choose an event to modify</option>
                             {% for evt in events %}
                                 <option value="{{ evt.id }}" {% if event and event.id == evt.id %}selected{% endif %}>
@@ -45,6 +46,7 @@
             <div class="card-body">
                 <form id="modify-event-form" method="POST" action="{{ url_for('modify_event', event_id=event.id) }}" class="needs-validation" novalidate>
                     <div class="mb-3">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <label for="event-name" class="form-label">Event Name</label>
                         <input type="text" class="form-control" id="event-name" name="name" value="{{ event.name }}" required>
                         <div class="invalid-feedback">

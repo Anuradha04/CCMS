@@ -177,8 +177,7 @@ function initEventSelection() {
             const eventId = this.value;
             
             if (eventId) {
-                // Redirect to same page with event ID in query params
-                window.location.href = `/board/modify_event?event_id=${eventId}`;
+                fetchEventData(eventId); // Call the fetch function when selection changes
             }
         });
     }
@@ -196,8 +195,7 @@ function initClubSelection() {
             const clubId = this.value;
             
             if (clubId) {
-                // Redirect to same page with club ID in query params
-                window.location.href = `/board/modify_club?club_id=${clubId}`;
+                fetchClubData(clubId); // Call the fetch function when selection changes
             }
         });
     }
@@ -208,26 +206,37 @@ function initClubSelection() {
  * @param {number} eventId - The ID of the event to fetch
  */
 function fetchEventData(eventId) {
-    fetch(`/api/event/${eventId}`)
-        .then(response => response.json())
-        .then(data => {
-            // Populate form fields
-            document.getElementById('event-name').value = data.name;
-            document.getElementById('event-description').value = data.description;
-            document.getElementById('event-venue').value = data.venue;
-            document.getElementById('event-date-from').value = data.date_from;
-            document.getElementById('event-date-to').value = data.date_to;
-            document.getElementById('event-time-from').value = data.time_from;
-            document.getElementById('event-time-to').value = data.time_to;
-            document.getElementById('event-poc').value = data.poc;
-            
-            // Show form
-            document.getElementById('modify-event-form').classList.remove('d-none');
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showAlert('danger', 'An error occurred while fetching event data.');
-        });
+    fetch(`/api/event/${eventId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name="csrf_token"]').value
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Populate form fields
+        document.getElementById('event-name').value = data.name;
+        document.getElementById('event-description').value = data.description;
+        document.getElementById('event-venue').value = data.venue;
+        document.getElementById('event-date-from').value = data.date_from;
+        document.getElementById('event-date-to').value = data.date_to;
+        document.getElementById('event-time-from').value = data.time_from;
+        document.getElementById('event-time-to').value = data.time_to;
+        document.getElementById('event-poc').value = data.poc;
+        
+        // Show form
+        document.getElementById('modify-event-form').classList.remove('d-none');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('danger', 'An error occurred while fetching event data.');
+    });
 }
 
 /**
@@ -235,33 +244,71 @@ function fetchEventData(eventId) {
  * @param {number} clubId - The ID of the club to fetch
  */
 function fetchClubData(clubId) {
-    fetch(`/api/club/${clubId}`)
-        .then(response => response.json())
-        .then(data => {
-            // Populate form fields
-            document.getElementById('club-name').value = data.name;
-            document.getElementById('club-description').value = data.description;
-            
-            // Populate member fields if available
-            const members = data.members || {};
-            if (members['chairperson']) {
-                document.getElementById('club-chairperson').value = members['chairperson'];
-            }
-            if (members['vice chairperson']) {
-                document.getElementById('club-vice-chairperson').value = members['vice chairperson'];
-            }
-            if (members['secretary']) {
-                document.getElementById('club-secretary').value = members['secretary'];
-            }
-            if (members['co-secretary']) {
-                document.getElementById('club-co-secretary').value = members['co-secretary'];
-            }
-            
-            // Show form
-            document.getElementById('modify-club-form').classList.remove('d-none');
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showAlert('danger', 'An error occurred while fetching club data.');
-        });
+    fetch(`/api/club/${clubId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name="csrf_token"]').value
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Populate form fields
+        document.getElementById('club-name').value = data.name;
+        document.getElementById('club-description').value = data.description;
+        
+        // Populate member fields if available
+        const members = data.members || {};
+        if (members['chairperson']) {
+            document.getElementById('club-chairperson').value = members['chairperson'];
+        }
+        if (members['vice chairperson']) {
+            document.getElementById('club-vice-chairperson').value = members['vice chairperson'];
+        }
+        if (members['secretary']) {
+            document.getElementById('club-secretary').value = members['secretary'];
+        }
+        if (members['co-secretary']) {
+            document.getElementById('club-co-secretary').value = members['co-secretary'];
+        }
+        
+        // Show form
+        document.getElementById('modify-club-form').classList.remove('d-none');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('danger', 'An error occurred while fetching club data.');
+    });
+}
+
+/**
+ * Display a Bootstrap alert
+ * @param {string} type - Alert type (success, danger, warning, info)
+ * @param {string} message - Alert message
+ */
+function showAlert(type, message) {
+    const alertsContainer = document.getElementById('alerts-container');
+    
+    if (!alertsContainer) return;
+    
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    
+    alertsContainer.innerHTML += alertHtml;
+    
+    // Auto-close after 5 seconds
+    const newAlert = alertsContainer.lastElementChild;
+    setTimeout(() => {
+        const bsAlert = new bootstrap.Alert(newAlert);
+        bsAlert.close();
+    }, 5000);
 }

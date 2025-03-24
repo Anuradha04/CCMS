@@ -1,10 +1,10 @@
 import os
 import logging
+from flask_wtf.csrf import CSRFProtect
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from flask_login import LoginManager
-from flask_wtf.csrf import CSRFProtect  # Added for CSRF protection
 from datetime import datetime
 
 # Configure logging
@@ -18,6 +18,7 @@ db = SQLAlchemy(model_class=Base)
 # Create the app
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")  # Changed from SESSION_SECRET to SECRET_KEY
+csrf = CSRFProtect(app)  
 
 # Configure the database
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///ccms.db")
