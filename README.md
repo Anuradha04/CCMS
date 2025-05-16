@@ -4,7 +4,7 @@ The **Clubs and Chapters Management System (CCMS)** is a centralized digital pla
 
 ---
 
-## 🎯 Project Objective
+##  Project Objective
 
 Many students miss out on campus events and club activities due to the absence of a centralized platform. CCMS solves this by providing:
 
@@ -15,7 +15,7 @@ Many students miss out on campus events and club activities due to the absence o
 
 ---
 
-## 👥 Stakeholders
+##  Stakeholders
 
 ###  Primary Stakeholders
 - **Students**  
@@ -49,14 +49,14 @@ Many students miss out on campus events and club activities due to the absence o
 - View **event details**: name, description, time, venue
 - Register for events
 
-### 🔹 Faculty / DSW Interface
+###  Faculty / DSW Interface
 - Monitor ongoing and upcoming events
 - Review club and chapter activities
 - Ensure adherence to institutional guidelines and policies
 
 ---
 
-## 🌐 Features Overview
+##  Features Overview
 
 | Feature                          | Description                                               |
 |----------------------------------|-----------------------------------------------------------|
